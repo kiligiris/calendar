@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+from datetime import datetime
 import tkinter as tk
+import holiday_get as hdg
 
 class mycalendar(tk.Frame):
     def __init__(self,master=None,cnf={},**kw):
         "初期化メソッド"
-        import datetime
         tk.Frame.__init__(self,master,cnf,**kw)
         
         # 現在の日付を取得
-        now = datetime.datetime.now()
+        now = datetime.now()
         # 現在の年と月を属性に追加
         self.year = now.year
         self.month = now.month
@@ -64,29 +65,23 @@ class mycalendar(tk.Frame):
         # 日付ボタンを格納する変数をdict型で作成
         #self.day = {}
         # for文を用いて、日付ボタンを生成
+        hd = hdg.holiday_get(year)
+
+        mhd = hdg.month_holiday(hd,month)
+        print(mhd)
         
+
         self.day = [[None] * 7] * len(days)
         for i in range(len(days)):
             for j, dw in enumerate(self.dow):
-                if days[i][j] != 0:
-                    self.day[i][j] = d_button(self.frame_calendar,text = days[i][j], fg = self.dow[dw])
+
+                day = days[i][j]
+                c = "red" if day in mhd else self.dow[dw]
+
+                if day != 0:
+                    self.day[i][j] = d_button(self.frame_calendar,text = day, fg = c)
                     self.day[i][j].grid(column=j,row=i)
         
-        '''
-        for i in range(len(days) * 7):
-            c = i - (7 * int(i/7))
-            r = int(i/7)
-        
-            # 日付が0でなかったら、ボタン作成
-            if days[r][c] != 0:
-                if c == 0:
-                    self.day[i] = d_button(self.frame_calendar,text = days[r][c], fg = "red")
-                elif c == 6:
-                    self.day[i] = d_button(self.frame_calendar,text = days[r][c], fg = "blue")
-                else:
-                    self.day[i] = d_button(self.frame_calendar,text = days[r][c])
-                self.day[i].grid(column=c,row=r)
-        '''
         
 # デフォルトのボタンクラス
 class d_button(tk.Button):
@@ -94,9 +89,9 @@ class d_button(tk.Button):
         tk.Button.__init__(self,master,cnf,**kw)
         self.configure(font=("",16),height=2, width=4, relief="flat")
             
-# ルートフレームの定義      
-root = tk.Tk()
-root.title("Calendar App")
-mycal = mycalendar(root)
-mycal.pack()
-root.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Calendar App")
+    mycal = mycalendar(root)
+    mycal.pack()
+    root.mainloop()
